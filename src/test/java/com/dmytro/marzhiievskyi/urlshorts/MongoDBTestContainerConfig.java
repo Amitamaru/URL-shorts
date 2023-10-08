@@ -18,10 +18,10 @@ public class MongoDBTestContainerConfig implements ApplicationContextInitializer
     }
 
     @Override
-    public void initialize(ConfigurableApplicationContext cntx) {
+    public void initialize(ConfigurableApplicationContext context) {
         TestPropertyValues.of(
                 "spring.data.mongodb.uri=" + mongoDBContainer.getReplicaSetUrl()
-        ).applyTo(cntx.getEnvironment());
+        ).applyTo(context.getEnvironment());
     }
 
 }

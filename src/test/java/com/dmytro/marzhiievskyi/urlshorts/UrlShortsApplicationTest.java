@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class UrlShortsApplicationTest extends AbstractControllerTest {
 
+    public static final String URL_CONVERTER_SHORTEN = "/api/v1/urlConverter/shorten";
+    public static final String RESOLVE_SHORT_URL = "/api/v1/urlConverter/resolve?shortUrl=";
+    public static final String RESOLVE_SHORT_URL_INVALID = "/api/v1/urlConverter/resolve?shortUrl=123";
     private final String longUrl = "https://google.com";
     private final String shortUrl = "https://ggl.cm";
 
@@ -27,17 +30,14 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
     @Test
     public void shorten_url_valid() throws Exception {
-        //given
-        var requestBuilder = MockMvcRequestBuilders.post("/api/v1/urlConverter/shorten")
+        var requestBuilder = MockMvcRequestBuilders.post(URL_CONVERTER_SHORTEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
                             "url":"https://google.com"
                         }
                         """);
-        //when
         perform(requestBuilder)
-                //then
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -49,17 +49,14 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
     @Test
     public void shorten_url_invalid() throws Exception {
-        //given
-        var requestBuilder = MockMvcRequestBuilders.post("/api/v1/urlConverter/shorten")
+        var requestBuilder = MockMvcRequestBuilders.post(URL_CONVERTER_SHORTEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
-                            "url":"httpps://google.com"
+                            "url":"https1://google.com"
                         }
                         """);
-        //when
         perform(requestBuilder)
-                //then
                 .andExpectAll(
                         status().is4xxClientError()
                 );
@@ -67,7 +64,6 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
     @Test
     public void resolve_url_valid() throws Exception {
-        //given
         urlMappingRepository.save(UrlMapping.builder()
                 .longUrl(longUrl)
                 .shortUrl(shortUrl)
@@ -75,10 +71,8 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
         assertEquals(shortUrl, urlMappingRepository.findByShortUrl(shortUrl).orElseThrow().getShortUrl());
 
-        var requestBuilder = MockMvcRequestBuilders.get("/api/v1/urlConverter/resolve?shortUrl=" + shortUrl);
-        //when
+        var requestBuilder = MockMvcRequestBuilders.get(RESOLVE_SHORT_URL + shortUrl);
         perform(requestBuilder)
-                //then
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -92,7 +86,6 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
     @Test
     public void resolve_url_invalid() throws Exception {
-        //given
         urlMappingRepository.save(UrlMapping.builder()
                 .longUrl(longUrl)
                 .shortUrl(shortUrl)
@@ -100,10 +93,8 @@ public class UrlShortsApplicationTest extends AbstractControllerTest {
 
         assertEquals(shortUrl, urlMappingRepository.findByShortUrl(shortUrl).orElseThrow().getShortUrl());
 
-        var requestBuilder = MockMvcRequestBuilders.get("/api/v1/urlConverter/resolve?shortUrl=123" + shortUrl);
-        //when
+        var requestBuilder = MockMvcRequestBuilders.get(RESOLVE_SHORT_URL_INVALID + shortUrl);
         perform(requestBuilder)
-                //then
                 .andExpectAll(
                         status().is4xxClientError()
                 );
